@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String     @id @default(uuid())
+  cpf                 String     @unique
+  fullName            String
+  fullName_normalized String     @default("") @db.Text
+  password            String
+  active              Boolean    @default(true)
+  gender              Gender
+  role                SystemRole
+  phone               String?
+
+  passwordResetToken     String?   @unique
+  passwordResetExpiresAt DateTime?
+  passwordResetUsedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  healthProfessional HealthProfessional?
+  participant        Participant?
+  researcher         Researcher?
+
+  @@index([fullName_normalized])
+  @@index([passwordResetToken])
+  @@map("user")
+}
+
+model Researcher {
+  id            String  @id @unique
+  email         String  @unique
+  institutionId String
+  fieldOfStudy  String?
+  active        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user        User        @relation(fields: [id], references: [id])
+  institution Institution @relation(fields: [institutionId], references: [id])
+
+  @@index([institutionId])
+  @@map("researcher")
+}
+
+model HealthProfessional {
+  id                    String  @id @unique
+  email                 String  @unique
+  active                Boolean @default(true)
+  speciality            String
+  speciality_normalized String  @default("") @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [id], references: [id])
+
+  @@index([speciality_normalized])
+  @@index([active])
+  @@map("health_professional")
+}
+
+model Institution {
+  id               String  @id @default(uuid())
+  title            String
+  title_normalized String  @default("") @db.Text
+  active           Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  researchers Researcher[]
+
+  @@index([title_normalized])
+  @@index([active])
+  @@map("institution")
+}
+
+model Participant {
+  id                   String              @id @unique
+  birthday             DateTime            @db.Date
+  weight               Int                 @default(0)
+  height               Int                 @default(0)
+  zipCode              String
+  street               String
+  number               String
+  complement           String?
+  city                 String
+  state                String
+  neighborhood         String
+  active               Boolean             @default(true)
+  socio_economic_level SocialEconomicLevel
+  scholarship          Scholarship
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [id], references: [id])
+
+  @@map("participant")
+}
+
+enum SystemRole {
+  MANAGER
+  PARTICIPANT
+  RESEARCHER
+  HEALTH_PROFESSIONAL
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Scholarship {
+  NONE
+  FUNDAMENTAL_INCOMPLETE
+  FUNDAMENTAL_COMPLETE
+  HIGH_SCHOOL_INCOMPLETE
+  HIGH_SCHOOL_COMPLETE
+  HIGHER_EDUCATION_INCOMPLETE
+  HIGHER_EDUCATION_COMPLETE
+  POSTGRADUATE
+  MASTERS
+  DOCTORATE
+}
+
+enum SocialEconomicLevel {
+  A
+  B
+  C
+  D
+  E
+}
