@@ -111,7 +111,7 @@ export class AuthService {
 
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
-        select: { id: true, fullName: true, cpf: true, role: true, active: true },
+        select: { id: true, fullName: true, cpf: true, email: true, role: true, active: true },
       });
 
       if (!user || !user.active) {
@@ -119,7 +119,7 @@ export class AuthService {
       }
 
       return {
-        user: { id: user.id, cpf: user.cpf, fullName: user.fullName, role: user.role },
+        user: { id: user.id, cpf: user.cpf ?? undefined, email: user.email ?? undefined, fullName: user.fullName, role: user.role },
         persistent: payload.persistent ?? false,
       };
     } catch (error) {
