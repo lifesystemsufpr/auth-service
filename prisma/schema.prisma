@@ -8,12 +8,13 @@ datasource db {
 
 model User {
   id                  String     @id @default(uuid())
-  cpf                 String     @unique
+  cpf                 String?    @unique
+  email               String?    @unique
   fullName            String
   fullName_normalized String     @default("") @db.Text
   password            String
   active              Boolean    @default(true)
-  gender              Gender
+  gender              Gender?
   role                SystemRole
   phone               String?
 

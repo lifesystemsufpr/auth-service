@@ -3,7 +3,7 @@ import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 export class LoginDto {
   @IsString()
   @IsNotEmpty()
-  cpf: string;
+  identifier: string;
 
   @IsString()
   @IsNotEmpty()

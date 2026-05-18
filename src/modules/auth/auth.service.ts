@@ -33,11 +33,14 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  async validateCredentials(cpf: string, password: string): Promise<Partial<User> | null> {
+  async validateCredentials(identifier: string, password: string): Promise<Partial<User> | null> {
     try {
-      const user = await this.prisma.user.findFirst({
-        where: { cpf },
-        select: { id: true, fullName: true, cpf: true, role: true, password: true, active: true },
+      const isEmail = identifier.includes('@');
+      const where = isEmail ? { email: identifier } : { cpf: identifier };
+
+      const user = await this.prisma.user.findUnique({
+        where,
+        select: { id: true, fullName: true, cpf: true, email: true, role: true, password: true, active: true },
       });
 
       if (!user) {
@@ -71,7 +74,8 @@ export class AuthService {
     const accessPayload: Omit<JwtPayload, 'iss' | 'aud'> = {
       sub: user.id,
       username: user.fullName,
-      cpf: user.cpf,
+      ...(user.cpf ? { cpf: user.cpf } : {}),
+      ...(user.email ? { email: user.email } : {}),
       role: user.role,
     };
 
@@ -201,11 +205,13 @@ export class AuthService {
   }
 
   private async findUserByEmail(email: string): Promise<User | null> {
+    const directUser = await this.prisma.user.findUnique({ where: { email } });
+    if (directUser) return directUser;
+
     const researcher = await this.prisma.researcher.findUnique({
       where: { email },
       select: { id: true },
     });
-
     if (researcher) {
       return this.prisma.user.findUnique({ where: { id: researcher.id } });
     }
@@ -214,7 +220,6 @@ export class AuthService {
       where: { email },
       select: { id: true },
     });
-
     if (healthProfessional) {
       return this.prisma.user.findUnique({ where: { id: healthProfessional.id } });
     }

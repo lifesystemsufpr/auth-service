@@ -21,6 +21,10 @@ export class UserService {
     const db = tx ?? this.prisma;
     const { password, fullName, ...rest } = dto;
 
+    if (!rest.cpf && !rest.email) {
+      throw new ConflictException('É necessário informar CPF ou e-mail');
+    }
+
     try {
       const user = await db.user.create({
         data: {
@@ -52,6 +56,10 @@ export class UserService {
 
   findByCpf(cpf: string) {
     return this.prisma.user.findUnique({ where: { cpf } });
+  }
+
+  findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
   async update(id: string, dto: UpdateUserDto, tx?: Prisma.TransactionClient) {

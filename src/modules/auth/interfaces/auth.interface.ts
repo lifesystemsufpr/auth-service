@@ -8,7 +8,8 @@ export interface AccessToken {
 export interface JwtPayload {
   sub: string;
   username: string;
-  cpf: string;
+  cpf?: string;
+  email?: string;
   role: SystemRole;
   iss: string;
   aud: string[];
@@ -21,7 +22,8 @@ export interface RefreshPayload {
 
 export interface Payload {
   id: string;
-  cpf: string;
+  cpf?: string;
+  email?: string;
   fullName: string;
   role: SystemRole;
 }

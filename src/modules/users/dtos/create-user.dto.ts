@@ -1,19 +1,27 @@
 import { Gender, SystemRole } from '@prisma/client';
 import {
   IsBoolean,
+  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateUserDto {
+  @ValidateIf((o) => !o.email)
   @IsString()
   @IsNotEmpty()
   @Length(11, 11, { message: 'CPF deve ter exatamente 11 dígitos' })
-  cpf: string;
+  cpf?: string;
+
+  @ValidateIf((o) => !o.cpf)
+  @IsEmail()
+  @IsNotEmpty()
+  email?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -24,7 +32,8 @@ export class CreateUserDto {
   phone?: string;
 
   @IsEnum(Gender)
-  gender: Gender;
+  @IsOptional()
+  gender?: Gender;
 
   @IsEnum(SystemRole)
   role: SystemRole;
