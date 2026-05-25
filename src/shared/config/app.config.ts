@@ -18,6 +18,7 @@ function getCorsOrigins(value: string | undefined): boolean | string | string[] 
 export default (): AppConfig => ({
   nest: {
     port: process.env.NEST_PORT ? +process.env.NEST_PORT : 3001,
+    host: process.env.NEST_HOST || process.env.HOST || '127.0.0.1',
     environment: process.env.NODE_ENV || 'development',
   },
   cors: {
@@ -33,6 +34,7 @@ export default (): AppConfig => ({
   },
   security: {
     jwtSecret: process.env.JWT_SECRET || 'defaultSecret',
+    jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'defaultSecret',
     jwtExpirationTime: process.env.JWT_EXPIRES_IN ? +process.env.JWT_EXPIRES_IN : DEFAULT_JWT_EXP,
     jwtRefreshExpirationTime: process.env.JWT_REFRESH_EXPIRES_IN
       ? +process.env.JWT_REFRESH_EXPIRES_IN
