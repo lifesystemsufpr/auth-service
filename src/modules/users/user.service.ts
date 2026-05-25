@@ -26,6 +26,20 @@ export class UserService {
     }
 
     try {
+      if (rest.cpf) {
+        const existingByCpf = await db.user.findUnique({ where: { cpf: rest.cpf } });
+        if (existingByCpf) {
+          throw new ConflictException('CPF já está em uso');
+        }
+      }
+
+      if (rest.email) {
+        const existingByEmail = await db.user.findUnique({ where: { email: rest.email } });
+        if (existingByEmail) {
+          throw new ConflictException('E-mail já está em uso');
+        }
+      }
+
       const user = await db.user.create({
         data: {
           ...rest,
@@ -40,7 +54,7 @@ export class UserService {
       return result;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException('CPF já está em uso');
+        throw new ConflictException('CPF ou e-mail já está em uso');
       }
       throw new InternalServerErrorException('Não foi possível criar o usuário');
     }
