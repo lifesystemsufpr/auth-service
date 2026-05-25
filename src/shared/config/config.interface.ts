@@ -9,11 +9,13 @@ export interface AppConfig {
 
 export interface NestConfig {
   port: number;
+  host: string;
   environment: string;
 }
 
 export interface SecurityConfig {
   jwtSecret: string;
+  jwtRefreshSecret: string;
   jwtExpirationTime: number;
   jwtRefreshExpirationTime: number;
 }
