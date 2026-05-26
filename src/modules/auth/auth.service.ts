@@ -68,7 +68,7 @@ export class AuthService {
   }
 
   async signIn(user: Payload, keepMeLoggedIn = false): Promise<AccessToken> {
-    const { jwtSecret, jwtExpirationTime, jwtRefreshExpirationTime } =
+    const { jwtSecret, jwtRefreshSecret, jwtExpirationTime, jwtRefreshExpirationTime } =
       this.configService.getOrThrow<SecurityConfig>('security');
 
     const accessPayload: Omit<JwtPayload, 'iss' | 'aud'> = {
@@ -84,15 +84,21 @@ export class AuthService {
       persistent: keepMeLoggedIn,
     };
 
+    const audiences = [
+      ...(user.email ? ['ivcf'] : []),
+      ...(user.cpf ? ['tecnoaging'] : []),
+    ];
+    const tokenAudiences = audiences.length > 0 ? audiences : TOKEN_AUDIENCES;
+
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(accessPayload, {
         secret: jwtSecret,
         expiresIn: jwtExpirationTime,
         issuer: SERVICE_NAME,
-        audience: TOKEN_AUDIENCES,
+        audience: tokenAudiences,
       }),
       this.jwtService.signAsync(refreshPayload, {
-        secret: jwtSecret,
+        secret: jwtRefreshSecret,
         expiresIn: keepMeLoggedIn ? THIRTY_DAYS_MS / 1000 : jwtRefreshExpirationTime,
         issuer: SERVICE_NAME,
       }),
@@ -102,11 +108,11 @@ export class AuthService {
   }
 
   async validateRefreshToken(token: string): Promise<{ user: Payload; persistent: boolean }> {
-    const { jwtSecret } = this.configService.getOrThrow<SecurityConfig>('security');
+    const { jwtRefreshSecret } = this.configService.getOrThrow<SecurityConfig>('security');
 
     try {
       const payload = await this.jwtService.verifyAsync<RefreshPayload>(token, {
-        secret: jwtSecret,
+        secret: jwtRefreshSecret,
       });
 
       const user = await this.prisma.user.findUnique({
