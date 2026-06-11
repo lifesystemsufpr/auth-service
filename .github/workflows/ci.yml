@@ -13,4 +13,5 @@ jobs:
       node-version: '22'
       package-manager: 'npm'
       coverage-threshold: 60
+      setup-command: 'npx prisma generate'
     secrets: inherit
