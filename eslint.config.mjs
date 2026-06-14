@@ -43,4 +43,15 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'warn',
     },
   },
+  // Testes (.spec.ts): parser sem o projeto type-checked — evita exigir que cada spec
+  // esteja no tsconfig (erro "not found by the project service") e desliga as regras
+  // type-aware, que não rodam sem type info. Mocks usam `as any` à vontade.
+  {
+    files: ['**/*.spec.ts', '**/*.e2e-spec.ts', 'test/**/*.ts'],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      globals: { ...globals.node, ...globals.jest },
+      parserOptions: { projectService: false, project: false },
+    },
+  },
 );
